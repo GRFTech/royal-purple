@@ -1,0 +1,35 @@
+package spring.royalpurple.back.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Table
+@Entity(name = "PRODUTOS_TB")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Produto {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String nome;
+
+    @Column(nullable = false)
+    private Float preco;
+
+    @ManyToOne
+    @JoinColumn(name = "tipo_item_id")
+    private TipoItem tipoItem;
+
+    @OneToMany
+    private List<ItemVenda> itemVendaList;
+
+    @ManyToMany(mappedBy = "vendas")
+    private List<Venda> venda;
+}
