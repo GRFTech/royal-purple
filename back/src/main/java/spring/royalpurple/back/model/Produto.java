@@ -27,9 +27,6 @@ public class Produto {
     @JoinColumn(name = "tipo_item_id")
     private TipoItem tipoItem;
 
-    @OneToMany
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL)
     private List<ItemVenda> itemVendaList;
-
-    @ManyToMany(mappedBy = "vendas")
-    private List<Venda> venda;
 }

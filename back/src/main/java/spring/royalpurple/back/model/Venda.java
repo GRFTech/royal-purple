@@ -26,13 +26,4 @@ public class Venda {
 
     @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL)
     private List<ItemVenda> itemVendaList;
-
-    @ManyToMany
-    @JoinTable(
-            name = "ITEM_VENDA_TB",
-            joinColumns = @JoinColumn(name = "venda_id"),
-            inverseJoinColumns = @JoinColumn(name = "produto_id")
-    )
-    private List<Produto> vendas;
-
 }
