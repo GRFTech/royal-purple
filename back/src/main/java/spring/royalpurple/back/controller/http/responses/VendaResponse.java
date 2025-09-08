@@ -14,5 +14,5 @@ public class VendaResponse {
     private Long id;
     private LocalDateTime dataVenda;
     private Float valorTotal;
-    private List<Long> produtoIds;
+    private List<Long> itemVendaIds;
 }

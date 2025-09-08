@@ -4,11 +4,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import spring.royalpurple.back.controller.http.requests.VendaRequest;
 import spring.royalpurple.back.controller.http.responses.VendaResponse;
-import spring.royalpurple.back.model.Produto;
+import spring.royalpurple.back.model.ItemVenda;
 import spring.royalpurple.back.model.Venda;
-import spring.royalpurple.back.repository.ProdutoRepository;
+import spring.royalpurple.back.repository.ItemVendaRepository;
 import spring.royalpurple.back.repository.VendaRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,11 +17,12 @@ import java.util.stream.Collectors;
 public class VendaService {
 
     private final VendaRepository vendaRepository;
-    private final ProdutoRepository produtoRepository;
+    private final ItemVendaRepository itemVendaRepository;
 
-    public VendaService(VendaRepository vendaRepository, ProdutoRepository produtoRepository) {
+    public VendaService(VendaRepository vendaRepository,
+                        ItemVendaRepository itemVendaRepository) {
         this.vendaRepository = vendaRepository;
-        this.produtoRepository = produtoRepository;
+        this.itemVendaRepository = itemVendaRepository;
     }
 
     @Transactional
@@ -29,12 +31,22 @@ public class VendaService {
         venda.setDataVenda(request.getDataVenda());
         venda.setValorTotal(request.getValorTotal());
 
-        if (request.getProdutoIds() != null && !request.getProdutoIds().isEmpty()) {
-            List<Produto> produtos = produtoRepository.findAllById(request.getProdutoIds());
-            venda.setVendas(produtos);
-        }
+        venda.setItemVendaList(new ArrayList<>());
 
         Venda saved = vendaRepository.save(venda);
+
+        if (request.getItemVendaIds() != null && !request.getItemVendaIds().isEmpty()) {
+            for (Long itemId : request.getItemVendaIds()) {
+                ItemVenda item = itemVendaRepository.findById(itemId)
+                        .orElseThrow(() -> new RuntimeException("Item de venda não encontrado com id " + itemId));
+
+                item.setVenda(saved);
+                itemVendaRepository.save(item);
+
+                saved.getItemVendaList().add(item);
+            }
+        }
+
         return toResponse(saved);
     }
 
@@ -50,7 +62,6 @@ public class VendaService {
                 .orElseThrow(() -> new RuntimeException("Venda não encontrada com id " + id));
         return toResponse(venda);
     }
-
     @Transactional
     public VendaResponse update(Long id, VendaRequest request) {
         Venda venda = vendaRepository.findById(id)
@@ -59,9 +70,21 @@ public class VendaService {
         venda.setDataVenda(request.getDataVenda());
         venda.setValorTotal(request.getValorTotal());
 
-        if (request.getProdutoIds() != null) {
-            List<Produto> produtos = produtoRepository.findAllById(request.getProdutoIds());
-            venda.setVendas(produtos);
+        if (request.getItemVendaIds() != null) {
+            List<ItemVenda> itemsToRemove = venda.getItemVendaList().stream()
+                    .filter(item -> !request.getItemVendaIds().contains(item.getId()))
+                    .collect(Collectors.toList());
+            itemVendaRepository.deleteAll(itemsToRemove);
+
+            List<ItemVenda> newItems = request.getItemVendaIds().stream()
+                    .map(itemId -> itemVendaRepository.findById(itemId)
+                            .orElseThrow(() -> new RuntimeException("ItemVenda não encontrado com id " + itemId)))
+                    .toList();
+
+            newItems.forEach(item -> item.setVenda(venda));
+
+            venda.getItemVendaList().clear();
+            venda.getItemVendaList().addAll(newItems);
         }
 
         Venda updated = vendaRepository.save(venda);
@@ -76,15 +99,15 @@ public class VendaService {
     }
 
     private VendaResponse toResponse(Venda venda) {
-        List<Long> produtoIds = venda.getVendas() != null
-                ? venda.getVendas().stream().map(Produto::getId).collect(Collectors.toList())
-                : null;
-
         return new VendaResponse(
                 venda.getId(),
                 venda.getDataVenda(),
                 venda.getValorTotal(),
-                produtoIds
+                venda.getItemVendaList() != null
+                        ? venda.getItemVendaList().stream()
+                        .map(ItemVenda::getId)
+                        .collect(Collectors.toList())
+                        : null
         );
     }
 }

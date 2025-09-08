@@ -17,6 +17,6 @@ public class VendaRequest {
     @NotNull(message = "O valor total é obrigatório")
     private Float valorTotal;
 
-    // IDs de produtos relacionados
-    private List<Long> produtoIds;
+    // IDs de item_venda relacionados
+    private List<Long> itemVendaIds;
 }

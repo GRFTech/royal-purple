@@ -12,6 +12,7 @@ spring:
     password: ${DB_PASSWORD:postgres}
     driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
 
+
 springdoc:
   api-docs:
     enabled: true
