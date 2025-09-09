@@ -1,5 +1,8 @@
 #  Sistema de Gestão para Açaíteria (Royal Purple)
 ![Uma ilustração de machine learning para detecção de intrusões](RoyalPurple_img.png)
+## Integrantes:
+- RANNYER GABRIEL DE OLIVEIRA
+- GABRIEL AUGUSTO ROSISCA ISPER
 ## 1. Tema / Escopo
 
 O projeto consiste no desenvolvimento de um sistema de gestão para uma açaíteria, com foco no controle de estoque, cadastro de produtos, categorias (tipo de item) e registro de vendas.
